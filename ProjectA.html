@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Project A : Marquette, Malavet</title>
+  </head>
+  <body onload="main()">
+    <canvas id="webgl" width="500" height="500"></canvas>
+		<br>
+    <span id='KeyDownResult'  ></span> 
+  <p>
+    Move the helicopter around the screen using WASD and mouse controls
+  </p>
+  <p>
+		Zoom Helicopter :   
+		<div class="slidecontainer">
+      <input type="range" min="0" max="40" value="20" class="slider" id="zoom">
+    </div>
+  </p>
+	<p>
+		Main Rotor :
+		<div class="slidecontainer">
+      <input type="range" min="1" max="1000" value="500" class="slider" id="main_rotor">
+    </div>
+	</p>
+	<p>
+		Tail Rotor :   
+		<div class="slidecontainer">
+      <input type="range" min="1" max="1000" value="500" class="slider" id="tail_rotor">
+    </div>
+  </p>
+  <p>
+    <br>
+    <br>
+		Spinny Rotor :   
+		<div class="slidecontainer">
+      <input type="range" min="1" max="400" value="200" class="slider" id="spin_rotor">
+    </div>
+  </p>
+  
+
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix-quat03.js"></script>
+    <script src="ProjectA.js"></script>
+  </body>
+</html>
