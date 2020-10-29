@@ -1,20 +1,4 @@
-//3456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_
-// (JT: why the numbers? counts columns, helps me keep 80-char-wide listings)
-//
-// Chapter 5: ColoredTriangle.js (c) 2012 matsuda  AND
-// Chapter 4: RotatingTriangle_withButtons.js (c) 2012 matsuda
-// became:
-//
-// BasicShapes.js  MODIFIED for EECS 351-1, 
-//									Northwestern Univ. Jack Tumblin
-//		--converted from 2D to 4D (x,y,z,w) vertices
-//		--extend to other attributes: color, surface normal, etc.
-//		--demonstrate how to keep & use MULTIPLE colored shapes in just one
-//			Vertex Buffer Object(VBO). 
-//		--create several canonical 3D shapes borrowed from 'GLUT' library:
-//		--Demonstrate how to make a 'stepped spiral' tri-strip,  and use it
-//			to build a cylinder, sphere, and torus.
-//
+
 // Vertex shader program----------------------------------
 var VSHADER_SOURCE = 
   'uniform mat4 u_ModelMatrix;\n' +
@@ -40,14 +24,17 @@ var FSHADER_SOURCE =
 // Global Variables
 var ANGLE_STEP = 45.0;		// Rotation angle rate (degrees/second)
 var floatsPerVertex = 7;	// # of Float32Array elements used for each vertex
+var canvas;
 													// (x,y,z,w)position + (r,g,b)color
 													// Later, see if you can add:
 													// (x,y,z) surface normal + (tx,ty) texture addr.
 
+
+
 function main() {
 //==============================================================================
   // Retrieve <canvas> element
-  var canvas = document.getElementById('webgl');
+  canvas = document.getElementById('webgl');
 
   // Get the rendering context for WebGL
   var gl = getWebGLContext(canvas);
@@ -260,58 +247,83 @@ function makeGroundGrid() {
 }
 
 function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
-//==============================================================================
-  // Clear <canvas>  colors AND the depth buffer
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  modelMatrix.setIdentity();    // DEFINE 'world-space' coords.
+
+  	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  	gl.viewport(canvas.width/2,											// Viewport lower-left corner
+   			0, 			// location(in pixels)
+  			canvas.width/2, 				// viewport width,
+			  canvas.height);			// viewport height in pixels.
+    var vpAspect = (canvas.width/2) /(canvas.height);
+  	modelMatrix.setIdentity();  
 
 
-// STEP 2: add in a 'perspective()' function call here to define 'camera lens':
-  modelMatrix.perspective(	42,   // FOVY: top-to-bottom vertical image angle, in degrees
-                            1.0,   // Image Aspect Ratio: camera lens width/height
+  	modelMatrix.perspective(	42,   // FOVY: top-to-bottom vertical image angle, in degrees
+                            vpAspect,   // Image Aspect Ratio: camera lens width/height
                         	1.0,   // camera z-near distance (always positive; frustum begins at z = -znear)
-                        		1000.0);  // camera z-far distance (always positive; frustum ends at z = -zfar)
-
-
-/*
-//  STEP 1:
-// Make temporary view matrix that is still close to the origin and
-// won't lose sight of our current CVV contents when used without 
-// a properly-constructed projection matrix.
-//TEMPORARY: 1/10th size camera pose to see what's in CVV locations
-  modelMatrix.lookAt( ??, ??, ??,	// center of projection
-                      ??, ??, ??,	// look-at point 
-                      ??, ??, ??);	// View UP vector.
-*/
-
-
-// STEP 2: 
-//Replace the temporary view matrix with your final view matrix...
-// GOAL: camera positioned at 3D point (5,5,3), looking at the 
-//       3D point (-1,-2,-0.5),  using up vector (0,0,1).
+                        	1000.0);  // camera z-far distance (always positive; frustum ends at z = -zfar)
 
 	modelMatrix.lookAt(5, 5, 3,	// center of projection
 					  -1, -2, -0.5,	// look-at point 
 						0, 0, 1);	// View UP vector.
 
 
-  //===========================================================
-  //
-  pushMatrix(modelMatrix);     // SAVE world coord system;
-  	//---------Draw Ground Plane, without spinning.
-  	// position it.
+	pushMatrix(modelMatrix);     // SAVE world coord system;
+	  
+
   	modelMatrix.translate( 0.4, -0.4, 0.0);	
   	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
 
   	// Drawing:
   	// Pass our current matrix to the vertex shaders:
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-    // Draw just the ground-plane's vertices
+	// Draw just the ground-plane's vertices
+	
+
     gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
     						  gndStart/floatsPerVertex,	// start at this vertex number, and
-    						  gndVerts.length/floatsPerVertex);	// draw this many vertices.
-  modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
-  //===========================================================
+							  gndVerts.length/floatsPerVertex);	// draw this many vertices.
+
+
+	gl.viewport(0, 0, canvas.width/2, canvas.height);
+
+	modelMatrix.perspective(42, 1.0, 1.0, 1000.0);
+
+	modelMatrix.lookAt(5, 5, 3,	// center of projection
+	-1, -2, -0.5,	// look-at point 
+	0, 0, 1);	// View UP vector.
+
+	modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
+	  
+
+  	
+
+
+	//===========================================================
+	//
+	pushMatrix(modelMatrix);     // SAVE world coord system;
+	//---------Draw Ground Plane, without spinning.
+	// position it.
+	modelMatrix.translate( 0.4, -0.4, 0.0);	
+	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
+
+	// Drawing:
+	// Pass our current matrix to the vertex shaders:
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	// Draw just the ground-plane's vertices
+
+
+	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
+		  gndStart/floatsPerVertex,	// start at this vertex number, and
+		  gndVerts.length/floatsPerVertex);	// draw this many vertices.
+
+}
+
+function drawResize()
+{
+	var xtraMargin = 16;
+	canvas.width = window.innerWidth - xtraMargin;
+	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
+	drawAll();
 }
 
 // Last time that this function was called:  (used for animation timing)
