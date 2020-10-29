@@ -35,7 +35,7 @@ function main() {
 //==============================================================================
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
-
+  window.addEventListener("keydown", myKeyDown, false);
   // Get the rendering context for WebGL
   var gl = getWebGLContext(canvas);
   if (!gl) {
@@ -253,65 +253,31 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
    			0, 			// location(in pixels)
   			canvas.width/2, 				// viewport width,
 			  canvas.height);			// viewport height in pixels.
-    var vpAspect = (canvas.width/2) /(canvas.height);
-  	modelMatrix.setIdentity();  
+	var vpAspect = (canvas.width/2) /(canvas.height);
 
-
-  	modelMatrix.perspective(	42,   // FOVY: top-to-bottom vertical image angle, in degrees
-                            vpAspect,   // Image Aspect Ratio: camera lens width/height
-                        	1.0,   // camera z-near distance (always positive; frustum begins at z = -znear)
-                        	1000.0);  // camera z-far distance (always positive; frustum ends at z = -zfar)
-
-	modelMatrix.lookAt(5, 5, 3,	// center of projection
-					  -1, -2, -0.5,	// look-at point 
-						0, 0, 1);	// View UP vector.
-
-
-	pushMatrix(modelMatrix);     // SAVE world coord system;
-	  
-
-  	modelMatrix.translate( 0.4, -0.4, 0.0);	
-  	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
-
-  	// Drawing:
-  	// Pass our current matrix to the vertex shaders:
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	// Draw just the ground-plane's vertices
 	
-
+	// ORTHOGRAPHIC VIEW ///////////////////////////////////////////////////////////////////////////
+	pushMatrix(modelMatrix);
+  	modelMatrix.setIdentity();  
+	modelMatrix.setOrtho(1,-1,-1,1,0,100);
+	modelMatrix.lookAt(5, 5, 3,	// center of projection
+		-1, -2, -0.2,	// look-at point 
+		0, 0, 1);	// View UP vector.
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	
     gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
     						  gndStart/floatsPerVertex,	// start at this vertex number, and
 							  gndVerts.length/floatsPerVertex);	// draw this many vertices.
-
-
+	
+	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
 	gl.viewport(0, 0, canvas.width/2, canvas.height);
-
-	modelMatrix.perspective(42, 1.0, 1.0, 1000.0);
-
+	modelMatrix = popMatrix();				  
+	modelMatrix.setIdentity();  
+	modelMatrix.perspective(40, vpAspect, 1.0, 1000.0);
 	modelMatrix.lookAt(5, 5, 3,	// center of projection
-	-1, -2, -0.5,	// look-at point 
-	0, 0, 1);	// View UP vector.
-
-	modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
-	  
-
-  	
-
-
-	//===========================================================
-	//
-	pushMatrix(modelMatrix);     // SAVE world coord system;
-	//---------Draw Ground Plane, without spinning.
-	// position it.
-	modelMatrix.translate( 0.4, -0.4, 0.0);	
-	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
-
-	// Drawing:
-	// Pass our current matrix to the vertex shaders:
+		-1, -2, -0.2,	// look-at point 
+		0, 0, 1);	// View UP vector.
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	// Draw just the ground-plane's vertices
-
-
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
 		  gndStart/floatsPerVertex,	// start at this vertex number, and
 		  gndVerts.length/floatsPerVertex);	// draw this many vertices.
@@ -368,3 +334,38 @@ function runStop() {
   }
 }
  
+function myKeyDown(kev) {
+	switch(kev.code) {
+		//------------------WASD navigation-----------------
+		case "KeyA":
+			g_horizontal-=0.05;
+			break;
+    	case "KeyD":  
+			g_horizontal+=0.05;
+			break;
+		case "KeyS":  
+			g_vertical-=0.05;
+			break;
+		case "KeyW":  
+			g_vertical+=0.05;
+			break;
+		case "KeyE":  
+			g_rotation-=5;
+			break;
+		case "KeyQ":  
+			g_rotation+=5;
+			break;
+		case "KeyX":  
+			g_pitch-=5;
+			break;
+		case "KeyZ":  
+			g_pitch+=5;
+			break;
+		case "ArrowUp":		  
+			g_scale-=0.1;
+			break;
+		case "ArrowDown":  
+			g_scale+=0.1;
+			break;	
+	}
+}
