@@ -35,6 +35,9 @@ function main() {
 //==============================================================================
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
+  var xtraMargin = 16;
+	canvas.width = window.innerWidth - xtraMargin;
+	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
   window.addEventListener("keydown", myKeyDown, false);
   // Get the rendering context for WebGL
   var gl = getWebGLContext(canvas);
