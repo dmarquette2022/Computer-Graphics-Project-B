@@ -28,7 +28,9 @@ var canvas;
 
 var g_EyeX = 5, g_EyeY = 5, g_EyeZ = 3; 
 var g_LookAtX = 1, g_LookAtY = 1, g_LookatZ = 1;
-var g_DisplaceX = 0, g_DisplaceY = 0, g_DisplaceZ = 0;
+var g_DisplaceX = (g_LookAtX - g_EyeX) * 0.2;
+var g_DisplaceY = (g_LookAtY - g_EyeY) * 0.2;
+var g_DisplaceZ = (g_LookatZ - g_EyeZ) * 0.2;
 var theta = 90;
 var ilt = 0;
 
@@ -48,8 +50,8 @@ function main() {
   var xtraMargin = 16;
 	canvas.width = window.innerWidth - xtraMargin;
 	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
-  window.addEventListener("keydown", myKeyDown, false);
   // Get the rendering context for WebGL
+  
   var gl = getWebGLContext(canvas);
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
@@ -112,7 +114,8 @@ function initVertexBuffer(gl)
 // shapes.
  
  	// Make each 3D shape in its own array of vertices:
-  	makeGroundGrid();				// create, fill the gndVerts array
+	  makeGroundGrid();
+	  				// create, fill the gndVerts array
   // how many floats total needed to store all shapes?
 	var mySiz = (gndVerts.length);						
 
@@ -122,21 +125,6 @@ function initVertexBuffer(gl)
 	// Copy all shapes into one big Float32 array:
   var colorShapes = new Float32Array(mySiz);
 
-  /*
-	// Copy them:  remember where to start for each shape:
-	cylStart = 0;							// we stored the cylinder first.
-  for(i=0,j=0; j< cylVerts.length; i++,j++) {
-  	colorShapes[i] = cylVerts[j];
-		}
-		sphStart = i;						// next, we'll store the sphere;
-	for(j=0; j< sphVerts.length; i++, j++) {// don't initialize i -- reuse it!
-		colorShapes[i] = sphVerts[j];
-		}
-		torStart = i;						// next, we'll store the torus;
-	for(j=0; j< torVerts.length; i++, j++) {
-		colorShapes[i] = torVerts[j];
-		}
-		*/
 		gndStart = 0;						// next we'll store the ground-plane;
 	for(i=0, j=0; j< gndVerts.length; i++, j++)
 	{
@@ -273,11 +261,11 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	
 	// ORTHOGRAPHIC VIEW ///////////////////////////////////////////////////////////////////////////
 	pushMatrix(modelMatrix);
-  	modelMatrix.setIdentity();  
-	modelMatrix.setOrtho(1,-1,-1,1,0,100);
-	modelMatrix.lookAt(5, 5, 3,	// center of projection
-		-1, -2, -0.2,	// look-at point 
-		0, 0, 1);	// View UP vector.
+	modelMatrix.setIdentity();
+	modelMatrix.setOrtho(-60,60,-60,60,1,500);
+	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
+		g_LookAtX, g_LookAtY, g_LookatZ,	// wlook-at point 
+		0, 0, 1);
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	
     gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
@@ -288,7 +276,7 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	gl.viewport(0, 0, canvas.width/2, canvas.height);  
 	modelMatrix = popMatrix();	
 	modelMatrix.setIdentity(); 			    
-	modelMatrix.perspective(40, vpAspect, 1.0, 1000.0);
+	modelMatrix.perspective(40, vpAspect, 1.0, 500.0);
 	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
 		g_LookAtX, g_LookAtY, g_LookatZ,	// look-at point 
 		0, 0, 1);	// View UP vector.
@@ -347,20 +335,20 @@ function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
 							g_LookatZ -= g_DisplaceZ;
 				} else
 		if(ev.keyCode == 68) { //D Key
-							theta -= 2;
+							theta -= 1;
 							g_LookAtX = g_EyeX + Math.cos(theta * (Math.PI/180));
 							g_LookAtY = g_EyeY + Math.sin(theta * (Math.PI/180));
 				} else 
 		if(ev.keyCode == 65) { //A Key
-							theta += 2;
+							theta += 1;
 							g_LookAtX = g_EyeX + Math.cos(theta * (Math.PI/180));
 							g_LookAtY = g_EyeY + Math.sin(theta * (Math.PI/180));
 				} else
 		if(ev.keyCode == 87) { //W Key
-							g_LookatZ += 0.1;
+							g_LookatZ += 0.04;
 				} else
 		if(ev.keyCode == 83) { //S Key
-							g_LookatZ -= 0.1;
+							g_LookatZ -= 0.04;
 				} else 
 		if (ev.keyCode == 37) { // The left arrow key was pressed
 	//      g_EyeX -= 0.01;
@@ -380,73 +368,7 @@ function animate(angle) {
   // Calculate the elapsed time
   var now = Date.now();
   var elapsed = now - g_last;
-  g_last = now;    
-  // Update the current rotation angle (adjusted by the elapsed time)
-  //  limit the angle to move smoothly between +20 and -85 degrees:
-//  if(angle >  120.0 && ANGLE_STEP > 0) ANGLE_STEP = -ANGLE_STEP;
-//  if(angle < -120.0 && ANGLE_STEP < 0) ANGLE_STEP = -ANGLE_STEP;
-  
-  var newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0;
-  return newAngle %= 360;
-}
+  g_last = now;
+      
 
-//==================HTML Button Callbacks
-function nextShape() {
-	shapeNum += 1;
-	if(shapeNum >= shapeMax) shapeNum = 0;
-}
-
-function spinDown() {
- ANGLE_STEP -= 25; 
-}
-
-function spinUp() {
-  ANGLE_STEP += 25; 
-}
-
-function runStop() {
-  if(ANGLE_STEP*ANGLE_STEP > 1) {
-    myTmp = ANGLE_STEP;
-    ANGLE_STEP = 0;
-  }
-  else {
-  	ANGLE_STEP = myTmp;
-  }
-}
- 
-
-function myKeyDown(kev) {
-	switch(kev.code) {
-		//------------------WASD navigation-----------------
-		case "KeyA":
-			g_horizontal-=0.05;
-			break;
-    	case "KeyD":  
-			g_horizontal+=0.05;
-			break;
-		case "KeyS":  
-			g_vertical-=0.05;
-			break;
-		case "KeyW":  
-			g_vertical+=0.05;
-			break;
-		case "KeyE":  
-			g_rotation-=5;
-			break;
-		case "KeyQ":  
-			g_rotation+=5;
-			break;
-		case "KeyX":  
-			g_pitch-=5;
-			break;
-		case "KeyZ":  
-			g_pitch+=5;
-			break;
-		case "ArrowUp":		  
-			g_scale-=0.1;
-			break;
-		case "ArrowDown":  
-			g_scale+=0.1;
-			break;	
-	}
 }
