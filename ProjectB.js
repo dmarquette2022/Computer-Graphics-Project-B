@@ -25,6 +25,16 @@ var FSHADER_SOURCE =
 var ANGLE_STEP = 45.0;		// Rotation angle rate (degrees/second)
 var floatsPerVertex = 7;	// # of Float32Array elements used for each vertex
 var canvas;
+
+var g_EyeX = 5, g_EyeY = 5, g_EyeZ = 3; 
+var g_LookAtX = 1, g_LookAtY = 1, g_LookatZ = 1;
+var g_DisplaceX = 0, g_DisplaceY = 0, g_DisplaceZ = 0;
+var theta = 90;
+var ilt = 0;
+
+
+
+
 													// (x,y,z,w)position + (r,g,b)color
 													// Later, see if you can add:
 													// (x,y,z) surface normal + (tx,ty) texture addr.
@@ -35,7 +45,9 @@ function main() {
 //==============================================================================
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
-  window.addEventListener("keydown", myKeyDown, false);
+  var xtraMargin = 16;
+	canvas.width = window.innerWidth - xtraMargin;
+	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
   // Get the rendering context for WebGL
   var gl = getWebGLContext(canvas);
   if (!gl) {
@@ -72,6 +84,8 @@ function main() {
   }
   // Create a local version of our model matrix in JavaScript 
   var modelMatrix = new Matrix4();
+
+  document.onkeydown= function(ev){keydown(ev, gl, u_ModelMatrix, modelMatrix); };
   
   // Create, init current rotation angle value in JavaScript
   var currentAngle = 0.0;
@@ -270,12 +284,12 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 							  gndVerts.length/floatsPerVertex);	// draw this many vertices.
 	
 	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
-	gl.viewport(0, 0, canvas.width/2, canvas.height);
-	modelMatrix = popMatrix();				  
-	modelMatrix.setIdentity();  
+	gl.viewport(0, 0, canvas.width/2, canvas.height);  
+	modelMatrix = popMatrix();	
+	modelMatrix.setIdentity(); 			    
 	modelMatrix.perspective(40, vpAspect, 1.0, 1000.0);
-	modelMatrix.lookAt(5, 5, 3,	// center of projection
-		-1, -2, -0.2,	// look-at point 
+	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
+		g_LookAtX, g_LookAtY, g_LookatZ,	// look-at point 
 		0, 0, 1);	// View UP vector.
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
@@ -291,6 +305,71 @@ function drawResize()
 	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
 	drawAll();
 }
+
+function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
+	//------------------------------------------------------
+	//HTML calls this'Event handler' or 'callback function' when we press a key:
+		g_DisplaceX = (g_LookAtX - g_EyeX) * 0.2;
+		g_DisplaceY = (g_LookAtY - g_EyeY) * 0.2;
+		g_DisplaceZ = (g_LookatZ - g_EyeZ) * 0.2;
+
+		var rotatedX = (g_DisplaceX * Math.cos(90 * (Math.PI/180))) - (g_DisplaceY * Math.sin(90 * (Math.PI/180)));
+		var rotatedY = (g_DisplaceX * Math.sin(90 * (Math.PI/180))) + (g_DisplaceY * Math.cos(90 * (Math.PI/180)));
+
+		
+		if(ev.keyCode == 39) { // The right arrow key was pressed
+	//      g_EyeX += 0.01;
+					g_EyeX -= rotatedX;		// INCREASED for perspective camera)
+					g_EyeY -= rotatedY;
+
+					g_LookAtX -= rotatedX;
+					g_LookAtY -= rotatedY;
+		} else 
+		if(ev.keyCode == 38) { // The up arrow key was pressed
+			//      g_EyeX += 0.01;
+							g_EyeX += g_DisplaceX;
+							g_EyeY += g_DisplaceY;
+							g_EyeZ += g_DisplaceZ;
+
+							g_LookAtX += g_DisplaceX;
+							g_LookAtY += g_DisplaceY;
+							g_LookatZ += g_DisplaceZ;
+				} else 
+		if(ev.keyCode == 40) { // The up arrow key was pressed
+			//      g_EyeX += 0.01;
+							g_EyeX -= g_DisplaceX;
+							g_EyeY -= g_DisplaceY;
+							g_EyeZ -= g_DisplaceZ;
+
+							g_LookAtX -= g_DisplaceX;
+							g_LookAtY -= g_DisplaceY;
+							g_LookatZ -= g_DisplaceZ;
+				} else
+		if(ev.keyCode == 68) { //D Key
+							theta -= 2;
+							g_LookAtX = g_EyeX + Math.cos(theta * (Math.PI/180));
+							g_LookAtY = g_EyeY + Math.sin(theta * (Math.PI/180));
+				} else 
+		if(ev.keyCode == 65) { //A Key
+							theta += 2;
+							g_LookAtX = g_EyeX + Math.cos(theta * (Math.PI/180));
+							g_LookAtY = g_EyeY + Math.sin(theta * (Math.PI/180));
+				} else
+		if(ev.keyCode == 87) { //W Key
+							g_LookatZ += 0.1;
+				} else
+		if(ev.keyCode == 83) { //S Key
+							g_LookatZ -= 0.1;
+				} else 
+		if (ev.keyCode == 37) { // The left arrow key was pressed
+	//      g_EyeX -= 0.01;
+					g_EyeX += rotatedX;		// INCREASED for perspective camera)
+					g_EyeY += rotatedY;
+
+					g_LookAtX += rotatedX;
+					g_LookAtY += rotatedY;
+		} else { return; } // Prevent the unnecessary drawing   
+	}
 
 // Last time that this function was called:  (used for animation timing)
 var g_last = Date.now();
@@ -334,6 +413,7 @@ function runStop() {
   }
 }
  
+
 function myKeyDown(kev) {
 	switch(kev.code) {
 		//------------------WASD navigation-----------------
