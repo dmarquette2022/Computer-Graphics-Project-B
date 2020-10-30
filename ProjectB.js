@@ -1,25 +1,25 @@
-
+	
 // Vertex shader program----------------------------------
 var VSHADER_SOURCE = 
-  'uniform mat4 u_ModelMatrix;\n' +
-  'attribute vec4 a_Position;\n' +
-  'attribute vec4 a_Color;\n' +
-  'varying vec4 v_Color;\n' +
-  'void main() {\n' +
-  '  gl_Position = u_ModelMatrix * a_Position;\n' +
-  '  gl_PointSize = 10.0;\n' +
-  '  v_Color = a_Color;\n' +
-  '}\n';
+'uniform mat4 u_ModelMatrix;\n' +
+'attribute vec4 a_Position;\n' +
+'attribute vec4 a_Color;\n' +
+'varying vec4 v_Color;\n' +
+'void main() {\n' +
+'  gl_Position = u_ModelMatrix * a_Position;\n' +
+'  gl_PointSize = 10.0;\n' +
+'  v_Color = a_Color;\n' +
+'}\n';
 
 // Fragment shader program----------------------------------
 var FSHADER_SOURCE = 
 //  '#ifdef GL_ES\n' +
-  'precision mediump float;\n' +
+'precision mediump float;\n' +
 //  '#endif GL_ES\n' +
-  'varying vec4 v_Color;\n' +
-  'void main() {\n' +
-  '  gl_FragColor = v_Color;\n' +
-  '}\n';
+'varying vec4 v_Color;\n' +
+'void main() {\n' +
+'  gl_FragColor = v_Color;\n' +
+'}\n';
 
 // Global Variables
 var ANGLE_STEP = 45.0;		// Rotation angle rate (degrees/second)
@@ -45,66 +45,66 @@ var ilt = 0;
 
 function main() {
 //==============================================================================
-  // Retrieve <canvas> element
-  canvas = document.getElementById('webgl');
-  var xtraMargin = 16;
-	canvas.width = window.innerWidth - xtraMargin;
-	canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
-  // Get the rendering context for WebGL
-  
-  var gl = getWebGLContext(canvas);
-  if (!gl) {
-    console.log('Failed to get the rendering context for WebGL');
-    return;
-  }
+// Retrieve <canvas> element
+canvas = document.getElementById('webgl');
+var xtraMargin = 16;
+canvas.width = window.innerWidth - xtraMargin;
+canvas.height = (window.innerHeight*(3/4)) - xtraMargin; 
+// Get the rendering context for WebGL
 
-  // Initialize shaders
-  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to intialize shaders.');
-    return;
-  }
+var gl = getWebGLContext(canvas);
+if (!gl) {
+	console.log('Failed to get the rendering context for WebGL');
+	return;
+}
 
-  // 
-  var n = initVertexBuffer(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
+// Initialize shaders
+if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+	console.log('Failed to intialize shaders.');
+	return;
+}
 
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+// 
+var n = initVertexBuffer(gl);
+if (n < 0) {
+	console.log('Failed to set the vertex information');
+	return;
+}
+
+// Specify the color for clearing <canvas>
+gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
 	// NEW!! Enable 3D depth-test when drawing: don't over-draw at any pixel 
 	// unless the new Z value is closer to the eye than the old one..
 //	gl.depthFunc(gl.LESS);			 // WebGL default setting: (default)
 	gl.enable(gl.DEPTH_TEST); 	 
 
-  // Get handle to graphics system's storage location of u_ModelMatrix
-  var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  if (!u_ModelMatrix) { 
-    console.log('Failed to get the storage location of u_ModelMatrix');
-    return;
-  }
-  // Create a local version of our model matrix in JavaScript 
-  var modelMatrix = new Matrix4();
+// Get handle to graphics system's storage location of u_ModelMatrix
+var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+if (!u_ModelMatrix) { 
+	console.log('Failed to get the storage location of u_ModelMatrix');
+	return;
+}
+// Create a local version of our model matrix in JavaScript 
+var modelMatrix = new Matrix4();
 
-  document.onkeydown= function(ev){keydown(ev, gl, u_ModelMatrix, modelMatrix); };
-  
-  // Create, init current rotation angle value in JavaScript
-  var currentAngle = 0.0;
+document.onkeydown= function(ev){keydown(ev, gl, u_ModelMatrix, modelMatrix); };
+
+// Create, init current rotation angle value in JavaScript
+var currentAngle = 0.0;
 
 //-----------------  
-  // Start drawing: create 'tick' variable whose value is this function:
-  var tick = function() {
-    currentAngle = animate(currentAngle);  // Update the rotation angle
-    drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
-    // report current angle on console
-    //console.log('currentAngle=',currentAngle);
-    requestAnimationFrame(tick, canvas);   
-    									// Request that the browser re-draw the webpage
-  };
-  tick();							// start (and continue) animation: draw current image
-    
+// Start drawing: create 'tick' variable whose value is this function:
+var tick = function() {
+	currentAngle = animate(currentAngle);  // Update the rotation angle
+	drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
+	// report current angle on console
+	//console.log('currentAngle=',currentAngle);
+	requestAnimationFrame(tick, canvas);   
+										// Request that the browser re-draw the webpage
+};
+tick();							// start (and continue) animation: draw current image
+	
 }
 
 function initVertexBuffer(gl) 
@@ -112,84 +112,84 @@ function initVertexBuffer(gl)
 //==============================================================================
 // Create one giant vertex buffer object (VBO) that holds all vertices for all
 // shapes.
- 
- 	// Make each 3D shape in its own array of vertices:
-	  makeGroundGrid();
-	  				// create, fill the gndVerts array
-  // how many floats total needed to store all shapes?
+
+	// Make each 3D shape in its own array of vertices:
+	makeGroundGrid();
+					// create, fill the gndVerts array
+// how many floats total needed to store all shapes?
 	var mySiz = (gndVerts.length);						
 
 	// How many vertices total?
 	var nn = mySiz / floatsPerVertex;
 	console.log('nn is', nn, 'mySiz is', mySiz, 'floatsPerVertex is', floatsPerVertex);
 	// Copy all shapes into one big Float32 array:
-  var colorShapes = new Float32Array(mySiz);
+var colorShapes = new Float32Array(mySiz);
 
 		gndStart = 0;						// next we'll store the ground-plane;
 	for(i=0, j=0; j< gndVerts.length; i++, j++)
 	{
 		colorShapes[i] = gndVerts[j];
 	}
-  // Create a buffer object on the graphics hardware:
-  var shapeBufferHandle = gl.createBuffer();  
-  if (!shapeBufferHandle) {
-    console.log('Failed to create the shape buffer object');
-    return false;
-  }
+// Create a buffer object on the graphics hardware:
+var shapeBufferHandle = gl.createBuffer();  
+if (!shapeBufferHandle) {
+	console.log('Failed to create the shape buffer object');
+	return false;
+}
 
-  // Bind the the buffer object to target:
-  gl.bindBuffer(gl.ARRAY_BUFFER, shapeBufferHandle);
-  // Transfer data from Javascript array colorShapes to Graphics system VBO
-  // (Use sparingly--may be slow if you transfer large shapes stored in files)
-  gl.bufferData(gl.ARRAY_BUFFER, colorShapes, gl.STATIC_DRAW);
-    
-  //Get graphics system's handle for our Vertex Shader's position-input variable: 
-  var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  if (a_Position < 0) {
-    console.log('Failed to get the storage location of a_Position');
-    return -1;
-  }
+// Bind the the buffer object to target:
+gl.bindBuffer(gl.ARRAY_BUFFER, shapeBufferHandle);
+// Transfer data from Javascript array colorShapes to Graphics system VBO
+// (Use sparingly--may be slow if you transfer large shapes stored in files)
+gl.bufferData(gl.ARRAY_BUFFER, colorShapes, gl.STATIC_DRAW);
+	
+//Get graphics system's handle for our Vertex Shader's position-input variable: 
+var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+if (a_Position < 0) {
+	console.log('Failed to get the storage location of a_Position');
+	return -1;
+}
 
-  var FSIZE = colorShapes.BYTES_PER_ELEMENT; // how many bytes per stored value?
+var FSIZE = colorShapes.BYTES_PER_ELEMENT; // how many bytes per stored value?
 
-  // Use handle to specify how to retrieve **POSITION** data from our VBO:
-  gl.vertexAttribPointer(
-  		a_Position, 	// choose Vertex Shader attribute to fill with data
-  		4, 						// how many values? 1,2,3 or 4.  (we're using x,y,z,w)
-  		gl.FLOAT, 		// data type for each value: usually gl.FLOAT
-  		false, 				// did we supply fixed-point data AND it needs normalizing?
-  		FSIZE * floatsPerVertex, // Stride -- how many bytes used to store each vertex?
-  									// (x,y,z,w, r,g,b) * bytes/value
-  		0);						// Offset -- now many bytes from START of buffer to the
-  									// value we will actually use?
-  gl.enableVertexAttribArray(a_Position);  
-  									// Enable assignment of vertex buffer object's position data
+// Use handle to specify how to retrieve **POSITION** data from our VBO:
+gl.vertexAttribPointer(
+		a_Position, 	// choose Vertex Shader attribute to fill with data
+		4, 						// how many values? 1,2,3 or 4.  (we're using x,y,z,w)
+		gl.FLOAT, 		// data type for each value: usually gl.FLOAT
+		false, 				// did we supply fixed-point data AND it needs normalizing?
+		FSIZE * floatsPerVertex, // Stride -- how many bytes used to store each vertex?
+									// (x,y,z,w, r,g,b) * bytes/value
+		0);						// Offset -- now many bytes from START of buffer to the
+									// value we will actually use?
+gl.enableVertexAttribArray(a_Position);  
+									// Enable assignment of vertex buffer object's position data
 
-  // Get graphics system's handle for our Vertex Shader's color-input variable;
-  var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-  if(a_Color < 0) {
-    console.log('Failed to get the storage location of a_Color');
-    return -1;
-  }
-  // Use handle to specify how to retrieve **COLOR** data from our VBO:
-  gl.vertexAttribPointer(
-  	a_Color, 				// choose Vertex Shader attribute to fill with data
-  	3, 							// how many values? 1,2,3 or 4. (we're using R,G,B)
-  	gl.FLOAT, 			// data type for each value: usually gl.FLOAT
-  	false, 					// did we supply fixed-point data AND it needs normalizing?
-  	FSIZE * 7, 			// Stride -- how many bytes used to store each vertex?
-  									// (x,y,z,w, r,g,b) * bytes/value
-  	FSIZE * 4);			// Offset -- how many bytes from START of buffer to the
-  									// value we will actually use?  Need to skip over x,y,z,w
-  									
-  gl.enableVertexAttribArray(a_Color);  
-  									// Enable assignment of vertex buffer object's position data
+// Get graphics system's handle for our Vertex Shader's color-input variable;
+var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+if(a_Color < 0) {
+	console.log('Failed to get the storage location of a_Color');
+	return -1;
+}
+// Use handle to specify how to retrieve **COLOR** data from our VBO:
+gl.vertexAttribPointer(
+	a_Color, 				// choose Vertex Shader attribute to fill with data
+	3, 							// how many values? 1,2,3 or 4. (we're using R,G,B)
+	gl.FLOAT, 			// data type for each value: usually gl.FLOAT
+	false, 					// did we supply fixed-point data AND it needs normalizing?
+	FSIZE * 7, 			// Stride -- how many bytes used to store each vertex?
+									// (x,y,z,w, r,g,b) * bytes/value
+	FSIZE * 4);			// Offset -- how many bytes from START of buffer to the
+									// value we will actually use?  Need to skip over x,y,z,w
+									
+gl.enableVertexAttribArray(a_Color);  
+									// Enable assignment of vertex buffer object's position data
 
 	//--------------------------------DONE!
-  // Unbind the buffer object 
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+// Unbind the buffer object 
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  return nn;
+return nn;
 }
 
 function makeGroundGrid() {
@@ -200,9 +200,9 @@ function makeGroundGrid() {
 	var xcount = 100;			// # of lines to draw in x,y to make the grid.
 	var ycount = 100;		
 	var xymax	= 50.0;			// grid size; extends to cover +/-xymax in x and y.
- 	var xColr = new Float32Array([1.0, 1.0, 0.3]);	// bright yellow
- 	var yColr = new Float32Array([0.5, 1.0, 0.5]);	// bright green.
- 	
+	var xColr = new Float32Array([1.0, 1.0, 0.3]);	// bright yellow
+	var yColr = new Float32Array([0.5, 1.0, 0.5]);	// bright green.
+	
 	// Create an (global) array to hold this ground-plane's vertices:
 	gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
 						// draw a grid made of xcount+ycount lines; 2 vertices per line.
@@ -251,11 +251,11 @@ function makeGroundGrid() {
 
 function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 
-  	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  	gl.viewport(canvas.width/2,											// Viewport lower-left corner
-   			0, 			// location(in pixels)
-  			canvas.width/2, 				// viewport width,
-			  canvas.height);			// viewport height in pixels.
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.viewport(canvas.width/2,											// Viewport lower-left corner
+			0, 			// location(in pixels)
+			canvas.width/2, 				// viewport width,
+			canvas.height);			// viewport height in pixels.
 	var vpAspect = (canvas.width/2) /(canvas.height);
 
 	
@@ -268,9 +268,9 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		0, 0, 1);
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	
-    gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-    						  gndStart/floatsPerVertex,	// start at this vertex number, and
-							  gndVerts.length/floatsPerVertex);	// draw this many vertices.
+	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
+							gndStart/floatsPerVertex,	// start at this vertex number, and
+							gndVerts.length/floatsPerVertex);	// draw this many vertices.
 	
 	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
 	gl.viewport(0, 0, canvas.width/2, canvas.height);  
@@ -282,8 +282,8 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		0, 0, 1);	// View UP vector.
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-		  gndStart/floatsPerVertex,	// start at this vertex number, and
-		  gndVerts.length/floatsPerVertex);	// draw this many vertices.
+		gndStart/floatsPerVertex,	// start at this vertex number, and
+		gndVerts.length/floatsPerVertex);	// draw this many vertices.
 
 }
 
@@ -365,10 +365,10 @@ var g_last = Date.now();
 
 function animate(angle) {
 //==============================================================================
-  // Calculate the elapsed time
-  var now = Date.now();
-  var elapsed = now - g_last;
-  g_last = now;
-      
+// Calculate the elapsed time
+var now = Date.now();
+var elapsed = now - g_last;
+g_last = now;
+	
 
 }
