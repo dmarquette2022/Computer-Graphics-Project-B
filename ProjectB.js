@@ -34,9 +34,19 @@ var g_DisplaceZ = (g_LookatZ - g_EyeZ) * 0.2;
 var theta = 90;
 var ilt = 0;
 
+window.addEventListener("mousedown", myMouseDown); 
+// (After each 'mousedown' event, browser calls the myMouseDown() fcn.)
+window.addEventListener("mousemove", myMouseMove); 
+window.addEventListener("mouseup", myMouseUp);	
+window.addEventListener("click", myMouseClick);				
+window.addEventListener("dblclick", myMouseDblClick);
+window.addEventListener("wheel",scroll);
 
-
-
+var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
+var g_xMclik=0.0;			// last mouse button-down position (in CVV coords)
+var g_yMclik=0.0;   
+var g_xMdragTot=0.0;	// total (accumulated) mouse-drag amounts (in CVV coords).
+var g_yMdragTot=0.0;
 
 function main() {
 //==============================================================================
@@ -110,23 +120,27 @@ function initVertexBuffer(gl)
 
 	// Make each 3D shape in its own array of vertices:
 	makeGroundGrid();
+	makeSphere();
 					// create, fill the gndVerts array
 // how many floats total needed to store all shapes?
-	var mySiz = (gndVerts.length);						
+	var mySiz = (gndVerts.length+sphVerts.length);						
 
 	// How many vertices total?
 	var nn = mySiz / floatsPerVertex;
 	console.log('nn is', nn, 'mySiz is', mySiz, 'floatsPerVertex is', floatsPerVertex);
 	// Copy all shapes into one big Float32 array:
 var colorShapes = new Float32Array(mySiz);
-
-		gndStart = 0;						// next we'll store the ground-plane;
-	for(i=0, j=0; j< gndVerts.length; i++, j++)
+	for(i=0,j=0;j<sphVerts.length;i++,j++){
+		colorShapes[j] = sphVerts[j]
+	}
+		gndStart = sphVerts.length;						// next we'll store the ground-plane;
+	for(i=gndStart, j=0; j< gndVerts.length; i++, j++)
 	{
 		colorShapes[i] = gndVerts[j];
 	}
 // Create a buffer object on the graphics hardware:
-var shapeBufferHandle = gl.createBuffer();  
+var shapeBufferHandle = gl.createBuffer();
+console.log(colorShapes)
 if (!shapeBufferHandle) {
 	console.log('Failed to create the shape buffer object');
 	return false;
@@ -186,7 +200,90 @@ gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 return nn;
 }
-
+function makeSphere() {
+	//==============================================================================
+	// Make a sphere from one OpenGL TRIANGLE_STRIP primitive.   Make ring-like 
+	// equal-lattitude 'slices' of the sphere (bounded by planes of constant z), 
+	// and connect them as a 'stepped spiral' design (see makeCylinder) to build the
+	// sphere from one triangle strip.
+	  var slices = 13;		// # of slices of the sphere along the z axis. >=3 req'd
+												// (choose odd # or prime# to avoid accidental symmetry)
+	  var sliceVerts	= 27;	// # of vertices around the top edge of the slice
+												// (same number of vertices on bottom of slice, too)
+	  var topColr = new Float32Array([0.7, 0.7, 0.7]);	// North Pole: light gray
+	  var equColr = new Float32Array([0.3, 0.7, 0.3]);	// Equator:    bright green
+	  var botColr = new Float32Array([0.9, 0.9, 0.9]);	// South Pole: brightest gray.
+	  var sliceAngle = Math.PI/slices;	// lattitude angle spanned by one slice.
+	
+		// Create a (global) array to hold this sphere's vertices:
+	  sphVerts = new Float32Array(  ((slices * 2* sliceVerts) -2) * floatsPerVertex);
+											// # of vertices * # of elements needed to store them. 
+											// each slice requires 2*sliceVerts vertices except 1st and
+											// last ones, which require only 2*sliceVerts-1.
+											
+		// Create dome-shaped top slice of sphere at z=+1
+		// s counts slices; v counts vertices; 
+		// j counts array elements (vertices * elements per vertex)
+		var cos0 = 0.0;					// sines,cosines of slice's top, bottom edge.
+		var sin0 = 0.0;
+		var cos1 = 0.0;
+		var sin1 = 0.0;	
+		var j = 0;							// initialize our array index
+		var isLast = 0;
+		var isFirst = 1;
+		for(s=0; s<slices; s++) {	// for each slice of the sphere,
+			// find sines & cosines for top and bottom of this slice
+			if(s==0) {
+				isFirst = 1;	// skip 1st vertex of 1st slice.
+				cos0 = 1.0; 	// initialize: start at north pole.
+				sin0 = 0.0;
+			}
+			else {					// otherwise, new top edge == old bottom edge
+				isFirst = 0;	
+				cos0 = cos1;
+				sin0 = sin1;
+			}								// & compute sine,cosine for new bottom edge.
+			cos1 = Math.cos((s+1)*sliceAngle);
+			sin1 = Math.sin((s+1)*sliceAngle);
+			// go around the entire slice, generating TRIANGLE_STRIP verts
+			// (Note we don't initialize j; grows with each new attrib,vertex, and slice)
+			if(s==slices-1) isLast=1;	// skip last vertex of last slice.
+			for(v=isFirst; v< 2*sliceVerts-isLast; v++, j+=floatsPerVertex) {	
+				if(v%2==0)
+				{				// put even# vertices at the the slice's top edge
+								// (why PI and not 2*PI? because 0 <= v < 2*sliceVerts
+								// and thus we can simplify cos(2*PI(v/2*sliceVerts))  
+					sphVerts[j  ] = sin0 * Math.cos(Math.PI*(v)/sliceVerts); 	
+					sphVerts[j+1] = sin0 * Math.sin(Math.PI*(v)/sliceVerts);	
+					sphVerts[j+2] = cos0;		
+					sphVerts[j+3] = 1.0;			
+				}
+				else { 	// put odd# vertices around the slice's lower edge;
+								// x,y,z,w == cos(theta),sin(theta), 1.0, 1.0
+								// 					theta = 2*PI*((v-1)/2)/capVerts = PI*(v-1)/capVerts
+					sphVerts[j  ] = sin1 * Math.cos(Math.PI*(v-1)/sliceVerts);		// x
+					sphVerts[j+1] = sin1 * Math.sin(Math.PI*(v-1)/sliceVerts);		// y
+					sphVerts[j+2] = cos1;																				// z
+					sphVerts[j+3] = 1.0;																				// w.		
+				}
+				if(s==0) {	// finally, set some interesting colors for vertices:
+					sphVerts[j+4]=topColr[0]; 
+					sphVerts[j+5]=topColr[1]; 
+					sphVerts[j+6]=topColr[2];	
+					}
+				else if(s==slices-1) {
+					sphVerts[j+4]=botColr[0]; 
+					sphVerts[j+5]=botColr[1]; 
+					sphVerts[j+6]=botColr[2];	
+				}
+				else {
+						sphVerts[j+4]=Math.random();// equColr[0]; 
+						sphVerts[j+5]=Math.random();// equColr[1]; 
+						sphVerts[j+6]=Math.random();// equColr[2];					
+				}
+			}
+		}
+	}
 function makeGroundGrid() {
 //==============================================================================
 // Create a list of vertices that create a large grid of lines in the x,y plane
@@ -257,16 +354,24 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	// ORTHOGRAPHIC VIEW ///////////////////////////////////////////////////////////////////////////
 	pushMatrix(modelMatrix);
 	modelMatrix.setIdentity();
-	modelMatrix.setOrtho(-60,60,-60,60,1,500);
+	console.log(canvas.height)
+	modelMatrix.setOrtho(-(canvas.width/2)/40,(canvas.width/2)/40,-canvas.height/40,canvas.height/40,1,500);
 	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
 		g_LookAtX, g_LookAtY, g_LookatZ,	// wlook-at point 
 		0, 0, 1);
+
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
 							gndStart/floatsPerVertex,	// start at this vertex number, and
 							gndVerts.length/floatsPerVertex);	// draw this many vertices.
-	
+	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
+	modelMatrix.rotate(dist*60.0, g_xMdragTot+0.0001,-g_yMdragTot+0.0001, 0.0);
+	modelMatrix.scale(10,10,10)
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		0/floatsPerVertex,	// start at this vertex number, and
+		sphVerts.length/floatsPerVertex);	// draw this many vertices.
 	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
 	gl.viewport(0, 0, canvas.width/2, canvas.height);  
 	modelMatrix = popMatrix();	
@@ -275,10 +380,18 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
 		g_LookAtX, g_LookAtY, g_LookatZ,	// look-at point 
 		0, 0, 1);	// View UP vector.
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-		gndStart/floatsPerVertex,	// start at this vertex number, and
-		gndVerts.length/floatsPerVertex);	// draw this many vertices.
+		gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	
+		gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
+								gndStart/floatsPerVertex,	// start at this vertex number, and
+								gndVerts.length/floatsPerVertex);	// draw this many vertices.
+		var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
+		modelMatrix.rotate(dist*60.0, g_xMdragTot+0.0001,-g_yMdragTot+0.0001, 0.0);
+		modelMatrix.scale(10,10,10)
+		gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+			0/floatsPerVertex,	// start at this vertex number, and
+			sphVerts.length/floatsPerVertex);	// draw this many vertices.
 
 }
 
@@ -367,3 +480,108 @@ g_last = now;
 	
 
 }
+function myMouseDown(ev) {
+	if(ev.clientY > 500){
+		return
+	}
+	  var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+	  var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+	  var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+
+	  
+	  var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+							   (canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+								 (canvas.height/2);
+	//	console.log('myMouseDown(CVV coords  ):  x, y=\t',x,',\t',y);
+		
+		g_isDrag = true;											// set our mouse-dragging flag
+		g_xMclik = x;													// record where mouse-dragging began
+		g_yMclik = y;
+	};
+	
+	
+	function myMouseMove(ev) {
+	//==============================================================================
+	// Called when user MOVES the mouse with a button already pressed down.
+	// 									(Which button?   console.log('ev.button='+ev.button);    )
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
+		if(g_isDrag==false) return;				// IGNORE all mouse-moves except 'dragging'
+	
+		// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
+	  var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+	  var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+		var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+	//  console.log('myMouseMove(pixel coords): xp,yp=\t',xp,',\t',yp);
+	  
+		// Convert to Canonical View Volume (CVV) coordinates too:
+	  var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+							   (canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+								 (canvas.height/2);
+	//	console.log('myMouseMove(CVV coords  ):  x, y=\t',x,',\t',y);
+	
+		// find how far we dragged the mouse:
+		g_xMdragTot += (x - g_xMclik);					// Accumulate change-in-mouse-position,&
+		g_yMdragTot += (y - g_yMclik);
+	
+		g_xMclik = x;													// Make next drag-measurement from here.
+		g_yMclik = y;
+	};
+	
+	function myMouseUp(ev) {
+		if(ev.clientY > 500){
+			g_isDrag = false;
+			return
+		}
+	//==============================================================================
+	// Called when user RELEASES mouse button pressed previously.
+	// 									(Which button?   console.log('ev.button='+ev.button);    )
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
+	
+	// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
+	  var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+	  var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+		var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+	//  console.log('myMouseUp  (pixel coords): xp,yp=\t',xp,',\t',yp);
+	  
+		// Convert to Canonical View Volume (CVV) coordinates too:
+	  var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+							   (canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+								 (canvas.height/2);
+		
+		g_isDrag = false;											// CLEAR our mouse-dragging flag, and
+		// accumulate any final bit of mouse-dragging we did:
+		g_xMdragTot += (x - g_xMclik);
+		g_yMdragTot += (y - g_yMclik);
+	};
+	
+	function myMouseClick(ev) {
+	//=============================================================================
+	// Called when user completes a mouse-button single-click event 
+	// (e.g. mouse-button pressed down, then released)
+	// 									   
+	//    WHICH button? try:  console.log('ev.button='+ev.button); 
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!) 
+	//    See myMouseUp(), myMouseDown() for conversions to  CVV coordinates.
+	
+	  // STUB
+		console.log("myMouseClick() on button: ", ev.button); 
+	}	
+	
+	function myMouseDblClick(ev) {
+	//=============================================================================
+	// Called when user completes a mouse-button double-click event 
+	// 									   
+	//    WHICH button? try:  console.log('ev.button='+ev.button); 
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!) 
+	//    See myMouseUp(), myMouseDown() for conversions to  CVV coordinates.
+	
+	  // STUB
+		console.log("myMouse-DOUBLE-Click() on button: ", ev.button); 
+	}	
