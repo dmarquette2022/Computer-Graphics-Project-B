@@ -37,11 +37,6 @@ var ilt = 0;
 
 
 
-													// (x,y,z,w)position + (r,g,b)color
-													// Later, see if you can add:
-													// (x,y,z) surface normal + (tx,ty) texture addr.
-
-
 
 function main() {
 //==============================================================================
