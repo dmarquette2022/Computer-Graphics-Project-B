@@ -311,92 +311,13 @@ function makeSphere() {
 			}
 		}
 	}
-function makeGroundGrid() {
-//==============================================================================
-// Create a list of vertices that create a large grid of lines in the x,y plane
-// centered at x=y=z=0.  Draw this shape using the GL_LINES primitive.
 
-	var xcount = 100;			// # of lines to draw in x,y to make the grid.
-	var ycount = 100;		
-	var xymax	= 50.0;			// grid size; extends to cover +/-xymax in x and y.
-	var xColr = new Float32Array([1.0, 1.0, 0.3]);	// bright yellow
-	var yColr = new Float32Array([0.5, 1.0, 0.5]);	// bright green.
-	
-	// Create an (global) array to hold this ground-plane's vertices:
-	gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
-						// draw a grid made of xcount+ycount lines; 2 vertices per line.
-						
-	var xgap = xymax/(xcount-1);		// HALF-spacing between lines in x,y;
-	var ygap = xymax/(ycount-1);		// (why half? because v==(0line number/2))
-	
-	// First, step thru x values as we make vertical lines of constant-x:
-	for(v=0, j=0; v<2*xcount; v++, j+= floatsPerVertex) {
-		if(v%2==0) {	// put even-numbered vertices at (xnow, -xymax, 0)
-			gndVerts[j  ] = -xymax + (v  )*xgap;	// x
-			gndVerts[j+1] = -xymax;								// y
-			gndVerts[j+2] = 0.0;									// z
-			gndVerts[j+3] = 1.0;									// w.
-		}
-		else {				// put odd-numbered vertices at (xnow, +xymax, 0).
-			gndVerts[j  ] = -xymax + (v-1)*xgap;	// x
-			gndVerts[j+1] = xymax;								// y
-			gndVerts[j+2] = 0.0;									// z
-			gndVerts[j+3] = 1.0;									// w.
-		}
-		gndVerts[j+4] = xColr[0];			// red
-		gndVerts[j+5] = xColr[1];			// grn
-		gndVerts[j+6] = xColr[2];			// blu
-	}
-	// Second, step thru y values as wqe make horizontal lines of constant-y:
-	// (don't re-initialize j--we're adding more vertices to the array)
-	for(v=0; v<2*ycount; v++, j+= floatsPerVertex) {
-		if(v%2==0) {		// put even-numbered vertices at (-xymax, ynow, 0)
-			gndVerts[j  ] = -xymax;								// x
-			gndVerts[j+1] = -xymax + (v  )*ygap;	// y
-			gndVerts[j+2] = 0.0;									// z
-			gndVerts[j+3] = 1.0;									// w.
-		}
-		else {					// put odd-numbered vertices at (+xymax, ynow, 0).
-			gndVerts[j  ] = xymax;								// x
-			gndVerts[j+1] = -xymax + (v-1)*ygap;	// y
-			gndVerts[j+2] = 0.0;									// z
-			gndVerts[j+3] = 1.0;									// w.
-		}
-		gndVerts[j+4] = yColr[0];			// red
-		gndVerts[j+5] = yColr[1];			// grn
-		gndVerts[j+6] = yColr[2];			// blu
-	}
-}
-
-function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
-
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.viewport(canvas.width/2,											// Viewport lower-left corner
-			0, 			// location(in pixels)
-			canvas.width/2, 				// viewport width,
-			canvas.height);			// viewport height in pixels.
-	var vpAspect = (canvas.width/2) /(canvas.height);
-
-	
-	// ORTHOGRAPHIC VIEW ///////////////////////////////////////////////////////////////////////////
-	pushMatrix(modelMatrix);
-	modelMatrix.setIdentity();
-	modelMatrix.setOrtho(-(canvas.width/2)/20,(canvas.width/2)/20,-canvas.height/20,canvas.height/20,1,500);
-	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
-		g_LookAtX, g_LookAtY, g_LookatZ,	// wlook-at point 
-		0, 0, 1);
-	modelMatrix.translate(40,30,-30,0)
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-
-	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-							gndStart/floatsPerVertex,	// start at this vertex number, and
-							gndVerts.length/floatsPerVertex);	// draw this many vertices.
-	
+function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	modelMatrix.translate(20,2,10,0);
 	modelMatrix.scale(4,4,4);
 	modelMatrix.rotate(spinny*2, 0,1, 0.0);
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
-	modelMatrix.concat(quatMatrix);
+	//modelMatrix.concat(quatMatrix);
 	
 	
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -501,6 +422,103 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
 	0/floatsPerVertex,	// start at this vertex number, and
 	sphVerts.length/floatsPerVertex);	// draw this many vertices.
+	
+}
+
+function drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+{
+	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
+	modelMatrix.concat(quatMatrix);
+	modelMatrix.scale(10,10,10);
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	0/floatsPerVertex,	// start at this vertex number, and
+	sphVerts.length/floatsPerVertex);	// draw this many vertices.
+}
+function makeGroundGrid() {
+//==============================================================================
+// Create a list of vertices that create a large grid of lines in the x,y plane
+// centered at x=y=z=0.  Draw this shape using the GL_LINES primitive.
+
+	var xcount = 100;			// # of lines to draw in x,y to make the grid.
+	var ycount = 100;		
+	var xymax	= 50.0;			// grid size; extends to cover +/-xymax in x and y.
+	var xColr = new Float32Array([1.0, 1.0, 0.3]);	// bright yellow
+	var yColr = new Float32Array([0.5, 1.0, 0.5]);	// bright green.
+	
+	// Create an (global) array to hold this ground-plane's vertices:
+	gndVerts = new Float32Array(floatsPerVertex*2*(xcount+ycount));
+						// draw a grid made of xcount+ycount lines; 2 vertices per line.
+						
+	var xgap = xymax/(xcount-1);		// HALF-spacing between lines in x,y;
+	var ygap = xymax/(ycount-1);		// (why half? because v==(0line number/2))
+	
+	// First, step thru x values as we make vertical lines of constant-x:
+	for(v=0, j=0; v<2*xcount; v++, j+= floatsPerVertex) {
+		if(v%2==0) {	// put even-numbered vertices at (xnow, -xymax, 0)
+			gndVerts[j  ] = -xymax + (v  )*xgap;	// x
+			gndVerts[j+1] = -xymax;								// y
+			gndVerts[j+2] = 0.0;									// z
+			gndVerts[j+3] = 1.0;									// w.
+		}
+		else {				// put odd-numbered vertices at (xnow, +xymax, 0).
+			gndVerts[j  ] = -xymax + (v-1)*xgap;	// x
+			gndVerts[j+1] = xymax;								// y
+			gndVerts[j+2] = 0.0;									// z
+			gndVerts[j+3] = 1.0;									// w.
+		}
+		gndVerts[j+4] = xColr[0];			// red
+		gndVerts[j+5] = xColr[1];			// grn
+		gndVerts[j+6] = xColr[2];			// blu
+	}
+	// Second, step thru y values as wqe make horizontal lines of constant-y:
+	// (don't re-initialize j--we're adding more vertices to the array)
+	for(v=0; v<2*ycount; v++, j+= floatsPerVertex) {
+		if(v%2==0) {		// put even-numbered vertices at (-xymax, ynow, 0)
+			gndVerts[j  ] = -xymax;								// x
+			gndVerts[j+1] = -xymax + (v  )*ygap;	// y
+			gndVerts[j+2] = 0.0;									// z
+			gndVerts[j+3] = 1.0;									// w.
+		}
+		else {					// put odd-numbered vertices at (+xymax, ynow, 0).
+			gndVerts[j  ] = xymax;								// x
+			gndVerts[j+1] = -xymax + (v-1)*ygap;	// y
+			gndVerts[j+2] = 0.0;									// z
+			gndVerts[j+3] = 1.0;									// w.
+		}
+		gndVerts[j+4] = yColr[0];			// red
+		gndVerts[j+5] = yColr[1];			// grn
+		gndVerts[j+6] = yColr[2];			// blu
+	}
+}
+
+function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
+
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.viewport(canvas.width/2,											// Viewport lower-left corner
+			0, 			// location(in pixels)
+			canvas.width/2, 				// viewport width,
+			canvas.height);			// viewport height in pixels.
+	var vpAspect = (canvas.width/2) /(canvas.height);
+
+	
+	// ORTHOGRAPHIC VIEW ///////////////////////////////////////////////////////////////////////////
+	pushMatrix(modelMatrix);
+	modelMatrix.setIdentity();
+	modelMatrix.setOrtho(-(canvas.width/2)/20,(canvas.width/2)/20,-canvas.height/20,canvas.height/20,1,500);
+	modelMatrix.lookAt(g_EyeX, g_EyeY, g_EyeZ,	// center of projection
+		g_LookAtX, g_LookAtY, g_LookatZ,	// wlook-at point 
+		0, 0, 1);
+	modelMatrix.translate(40,30,-30,0);
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
+							gndStart/floatsPerVertex,	// start at this vertex number, and
+							gndVerts.length/floatsPerVertex);	// draw this many vertices.
+	pushMatrix(modelMatrix);
+	drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+	modelMatrix = popMatrix();
+	drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 
 	
 	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
@@ -518,113 +536,10 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
 	gndStart/floatsPerVertex,	// start at this vertex number, and
 	gndVerts.length/floatsPerVertex);	// draw this many vertices.
-	modelMatrix.translate(20,2,10,0);
-	modelMatrix.scale(4,4,4);
-	modelMatrix.rotate(spinny*2, 0,1, 0.0);
-	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
-	modelMatrix.concat(quatMatrix);
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
 	pushMatrix(modelMatrix);
+	drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 	modelMatrix = popMatrix();
-	modelMatrix.scale(0.9,0.9,0.9);
-	modelMatrix.rotate(spinny*3, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny*4, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	modelMatrix = popMatrix();
-	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny*8, 1,1, 0.0);
-	modelMatrix.translate(0.8,0.8,0.8,0);
-
-	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices.
+	drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 }
 
 function drawResize()
