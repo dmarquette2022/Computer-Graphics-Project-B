@@ -31,7 +31,7 @@ var g_LookatZ = 2.4;
 var g_DisplaceX = (g_LookAtX - g_EyeX) * 0.2;
 var g_DisplaceY = (g_LookAtY - g_EyeY) * 0.2;
 var g_DisplaceZ = (g_LookatZ - g_EyeZ) * 0.2;
-var theta = 40;
+var theta = 90;
 var g_LookAtX = g_EyeX + Math.cos(theta * (Math.PI/180));
 var g_LookAtY = g_EyeY + Math.sin(theta * (Math.PI/180));
 
@@ -486,7 +486,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 function drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 {
 	modelMatrix.rotate(90, 1,0,0);
-	//modelMatrix.rotate(360 + circleAng, 0, 1, 0);
+	modelMatrix.rotate(-90 + theta, 0, 1, 0);
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
 	modelMatrix.concat(quatMatrix);
 	modelMatrix.scale(10,10,10);
