@@ -45,6 +45,12 @@ var yMdragTot=0.0;
 var rotatedX = (g_DisplaceX * Math.cos(90 * (Math.PI/180))) - (g_DisplaceY * Math.sin(90 * (Math.PI/180)));
 var rotatedY = (g_DisplaceX * Math.sin(90 * (Math.PI/180))) + (g_DisplaceY * Math.cos(90 * (Math.PI/180)));
 
+var circleAng;
+
+var circleDisp = new Vector3([g_EyeX, g_EyeY, g_EyeZ]);
+circleDisp.normalize();
+
+
 var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
 var qTot = new Quaternion(0,0,0,1);	// 'current' orientation (made from qNew)
 var quatMatrix = new Matrix4();				// rotation matrix, made from latest qTot
@@ -110,6 +116,7 @@ gl.clearColor(0.0, 0.0, 0.0, 1.0);
 //	gl.depthFunc(gl.LESS);			 // WebGL default setting: (default)
 	gl.enable(gl.DEPTH_TEST); 	 
 
+
 // Get handle to graphics system's storage location of u_ModelMatrix
 var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
 if (!u_ModelMatrix) { 
@@ -124,6 +131,7 @@ document.onkeydown= function(ev){keydown(ev, gl, u_ModelMatrix, modelMatrix); };
 // Create, init current rotation angle value in JavaScript
 var currentAngle = 0.0;
 
+circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI));
 //-----------------  
 // Start drawing: create 'tick' variable whose value is this function:
 var tick = function() {
@@ -427,6 +435,8 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 
 function drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 {
+	modelMatrix.rotate(90, 1,0,0);
+	//modelMatrix.rotate(360 + circleAng, 0, 1, 0);
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
 	modelMatrix.concat(quatMatrix);
 	modelMatrix.scale(10,10,10);
@@ -542,7 +552,7 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 }
 
-function drawResize()
+function drawResize(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 {
 	var xtraMargin = 16;
 	canvas.width = window.innerWidth - xtraMargin;
@@ -568,6 +578,7 @@ function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
 
 					g_LookAtX -= rotatedX;
 					g_LookAtY -= rotatedY;
+					circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI)) % 360;
 		} else 
 		if(ev.keyCode == 38) { // The up arrow key was pressed
 			//      g_EyeX += 0.01;
@@ -578,6 +589,7 @@ function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
 							g_LookAtX += g_DisplaceX;
 							g_LookAtY += g_DisplaceY;
 							g_LookatZ += g_DisplaceZ;
+							circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI)) % 360;
 				} else 
 		if(ev.keyCode == 40) { // The up arrow key was pressed
 			//      g_EyeX += 0.01;
@@ -588,6 +600,7 @@ function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
 							g_LookAtX -= g_DisplaceX;
 							g_LookAtY -= g_DisplaceY;
 							g_LookatZ -= g_DisplaceZ;
+							circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI)) % 360;
 				} else
 		if(ev.keyCode == 68) { //D Key
 							theta -= 1;
@@ -612,6 +625,7 @@ function keydown(ev, gl, u_ModelMatrix, modelMatrix) {
 
 					g_LookAtX += rotatedX;
 					g_LookAtY += rotatedY;
+					circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI)) % 360;
 		} else { return; } // Prevent the unnecessary drawing   
 	}
 
@@ -621,10 +635,10 @@ var g_last = Date.now();
 function animate(angle) {
 //==============================================================================
 // Calculate the elapsed time
-var now = Date.now();
-var elapsed = now - g_last;
-g_last = now;
-	
+	var now = Date.now();
+	var elapsed = now - g_last;
+	g_last = now;
+	return angle;
 
 }
 function myMouseDown(ev, gl, canvas) {
@@ -750,7 +764,7 @@ function myMouseDown(ev, gl, canvas) {
 
 		var dist = Math.sqrt(xdrag*xdrag + ydrag*ydrag);
 		// console.log('xdrag,ydrag=',xdrag.toFixed(5),ydrag.toFixed(5),'dist=',dist.toFixed(5));
-		qNew.setFromAxisAngle(-ydrag + 0.0001, xdrag + 0.0001, 0.0, dist*150.0);
+		qNew.setFromAxisAngle(-ydrag + 0.0001, xdrag + 0.0001, 0, dist*150.0);
 		//qNew.setFromAxisAngle(-rotatedY + 0.0001, rotatedX + 0.0001, 0.0, dist*150.0);
 		// (why add tiny 0.0001? To ensure we never have a zero-length rotation axis)
 								// why axis (x,y,z) = (-yMdrag,+xMdrag,0)? 
