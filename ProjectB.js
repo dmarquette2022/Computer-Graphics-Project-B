@@ -74,6 +74,52 @@ var g_xMdragTot=0.0;	// total (accumulated) mouse-drag amounts (in CVV coords).
 var g_yMdragTot=0.0;
 var gl;
 var n;
+var axis = [0,0,0,1,1,0,0,
+	1,0,0,1,1,0,0,
+	0,0,0,1,1,0,0,
+	0,0,0,1,0,1,0,
+	0,1,0,1,0,1,0,
+	0,0,0,1,0,1,0,
+	0,0,0,1,0,0,1,
+	0,0,1,1,0,0,1,
+	0,0,0,1,0,0,1];
+var rectangle = [	0.0, 0.0, 0.0, 1.0, 	1,0.7,1,
+0.0,  1.0, 0.0, 1.0,  	0,0,1,
+1.0,  1.0, 0.0, 1.0, 	0.7,0,0,
+0.0, 0.0,  0.0, 1.0, 	0.7,0.7,1, 
+1.0,  0.0,  0.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  0.0, 1.0, 	0.7,0.7,1,
+0.0, 0.0,  1.0, 1.0, 	1,0.7,1, 
+0.0,  1.0,  1.0, 1.0,  	0,0,1,   
+1.0,  1.0,  1.0, 1.0, 	1,0,0,   
+0.0, 0.0,  1.0, 1.0, 	0.7,0.7,1,
+1.0,  0.0,  1.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  1.0, 1.0, 	0.7,0.7,1,
+1.0, 0.0,  0.0, 1.0, 	0.7,0,1, 
+1.0,  1.0,  0.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  1.0, 1.0, 	0.7,0.7,1,
+1.0, 0.0,  0.0, 1.0, 	0.7,0,1, 
+1.0,  0.0,  1.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  1.0, 1.0, 	0.7,0.7,1,
+0.0, 0.0,  0.0, 1.0, 	1,0.7,1, 
+0.0,  1.0,  0.0, 1.0,   0,0,1,   
+0.0,  1.0,  1.0, 1.0, 	1,0,0,   
+0.0, 0.0,  0.0, 1.0, 	1, 0.7,1, 
+0.0,  0.0,  1.0, 1.0,   0,0,1,   
+0.0,  1.0,  1.0, 1.0, 	1,0,0,   
+0.0, 1.0,  0.0, 1.0, 	0.7,0.7,1, 
+0.0,  1.0,  1.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  1.0, 1.0, 	0.7,1,1,
+0.0, 1.0,  0.0, 1.0, 	0.7,0.7,1, 
+1.0,  1.0,  0.0, 1.0,   0.7,0.7,1,
+1.0,  1.0,  1.0, 1.0, 	0.7,0,1,
+0.0, 0.0,  0.0, 1.0, 	0.7,0.7,1, 
+0.0,  0.0,  1.0, 1.0,   0.7,0.7,1,
+1.0,  0.0,  1.0, 1.0, 	0.7,0.7,1,
+0.0, 0.0,  0.0, 1.0, 	0.7,0,1, 
+1.0,  0.0,  0.0, 1.0,   0.7,0.7,1,
+1.0,  0.0,  1.0, 1.0, 	0.7,0.7,1];
+
 
 function main() {
 //==============================================================================
@@ -135,7 +181,7 @@ circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI));
 //-----------------  
 // Start drawing: create 'tick' variable whose value is this function:
 var tick = function() {
-	spinny+=2
+	spinny+=1
 	currentAngle = animate(currentAngle);  // Update the rotation angle
 	drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
 	// report current angle on console
@@ -164,7 +210,11 @@ function initVertexBuffer(gl)
 	var nn = mySiz / floatsPerVertex;
 	console.log('nn is', nn, 'mySiz is', mySiz, 'floatsPerVertex is', floatsPerVertex);
 	// Copy all shapes into one big Float32 array:
-var colorShapes = new Float32Array(mySiz);
+	var colorShapes = new Array(mySiz);
+colorShapes = colorShapes.concat(rectangle);
+colorShapes = colorShapes.concat(axis);
+colorShapes = new Float32Array(colorShapes);
+mySiz = colorShapes.length;	
 	for(i=0,j=0;j<sphVerts.length;i++,j++){
 		colorShapes[j] = sphVerts[j]
 	}
@@ -445,6 +495,54 @@ function drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 	0/floatsPerVertex,	// start at this vertex number, and
 	sphVerts.length/floatsPerVertex);	// draw this many vertices.
 }
+function drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+{
+	modelMatrix.scale(5,5,5);
+	modelMatrix.rotate(90,0,-1,1)
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	(sphVerts.length+gndVerts.length)/floatsPerVertex,	// start at this vertex number, and
+	rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	modelMatrix.translate(1,1,1,0);
+	modelMatrix.rotate(90,1,0,0)
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	(sphVerts.length+gndVerts.length)/floatsPerVertex,	// start at this vertex number, and
+	rectangle.length/floatsPerVertex);	// draw this many vertices.
+	modelMatrix.translate(1,-1,1,0);
+	modelMatrix.rotate(90,0,0,1)
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	(sphVerts.length+gndVerts.length)/floatsPerVertex,	// start at this vertex number, and
+	rectangle.length/floatsPerVertex);	// draw this many vertices.
+}
+function drawAxis(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
+	modelMatrix.scale(30,30,30);
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+rectangle.length)/floatsPerVertex,	// start at this vertex number, and
+		axis.length/floatsPerVertex);
+		
+}
+function drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
+	
+	modelMatrix.translate(-20,30,10,0)
+	modelMatrix.rotate(60,0,0,1)
+	modelMatrix.scale(5,10,10)
+	
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this many vertices.aaa
+		modelMatrix.scale(2,1,1)
+		modelMatrix.rotate(45,1,0,0)
+		modelMatrix.translate(0.3,0.7,0.8,0)
+		gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	0/floatsPerVertex,	// start at this vertex number, and
+	sphVerts.length/floatsPerVertex);	// draw this many vertices..
+		
+}
 function makeGroundGrid() {
 //==============================================================================
 // Create a list of vertices that create a large grid of lines in the x,y plane
@@ -523,13 +621,28 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-							gndStart/floatsPerVertex,	// start at this vertex number, and
-							gndVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
-	modelMatrix = popMatrix();
-	drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
-
+		gndStart/floatsPerVertex,	// start at this vertex number, and
+		gndVerts.length/floatsPerVertex);	// draw this many vertices.
+		pushMatrix(modelMatrix);
+		drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawAxis(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		modelMatrix.rotate(90,-1,0,0)
+		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 	
 	// PERSPECTIVE VIEW ///////////////////////////////////////////////////////////////////////////
 	gl.viewport(0, 0, canvas.width/2, canvas.height);  
@@ -544,12 +657,28 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	//DRAWING THE GRID
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
-	gndStart/floatsPerVertex,	// start at this vertex number, and
-	gndVerts.length/floatsPerVertex);	// draw this many vertices.
-	pushMatrix(modelMatrix);
-	drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
-	modelMatrix = popMatrix();
-	drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		gndStart/floatsPerVertex,	// start at this vertex number, and
+		gndVerts.length/floatsPerVertex);	// draw this many vertices.
+		pushMatrix(modelMatrix);
+		drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawAxis(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		modelMatrix.rotate(90,-1,0,0)
+		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 }
 
 function drawResize(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
