@@ -58,6 +58,24 @@ var quatMatrix = new Matrix4();				// rotation matrix, made from latest qTot
 
 var sphereX = 0, sphereY = 0;
 var spinny = 0;
+var sp_1 = 1;
+var sp_2 = 1;
+var sp_3 = 1;
+var sp_4 = 1;
+var sp_5 = 1;
+var sp_6 = 1;
+var sp_7 = 1;
+var sp_8 = 1;
+var ag_0 = 1;
+var ag_1 = 1;
+var ag_2 = 1;
+var ag_3 = 1;
+var ag_4 = 1;
+var ag_5 = 1;
+var ag_6 = 1;
+var ag_7 = 1;
+var ag_8 = 1;
+var ag_0 = 1;
 
 
 //window.addEventListener("mousedown", myMouseDown); 
@@ -183,6 +201,24 @@ circleAng = (Math.asin(g_EyeX/g_EyeY) * (180/Math.PI));
 // Start drawing: create 'tick' variable whose value is this function:
 var tick = function() {
 	spinny+=1
+	sp_1 = document.getElementById("sp_1").value/10
+	sp_2 = document.getElementById("sp_2").value/10
+	sp_3 = document.getElementById("sp_3").value/10
+	sp_4 = document.getElementById("sp_4").value/10
+	sp_5 = document.getElementById("sp_5").value/10
+	sp_6 = document.getElementById("sp_6").value/10
+	sp_7 = document.getElementById("sp_7").value/10
+	sp_8 = document.getElementById("sp_8").value/10
+	sp_0 = document.getElementById("sp_0").value/10
+	ag_1 = document.getElementById("ag_1").value/10
+	ag_2 = document.getElementById("ag_2").value/10
+	ag_3 = document.getElementById("ag_3").value/10
+	ag_4 = document.getElementById("ag_4").value/10
+	ag_5 = document.getElementById("ag_5").value/10
+	ag_6 = document.getElementById("ag_6").value/10
+	ag_7 = document.getElementById("ag_7").value/10
+	ag_8 = document.getElementById("ag_8").value/10
+	ag_0 = document.getElementById("ag_0").value/10
 	currentAngle = animate(currentAngle);  // Update the rotation angle
 	drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
 	// report current angle on console
@@ -382,19 +418,19 @@ function makeSphere() {
 					sphVerts[j+3] = 1.0;																				// w.		
 				}
 				if(s==0) {	// finally, set some interesting colors for vertices:
-					sphVerts[j+4]=0.678-Math.random()/10;
-						sphVerts[j+5]=0.847-Math.random()/10;
-						sphVerts[j+6]=0.902;	
+					sphVerts[j+4]=Math.random();
+					sphVerts[j+5]=Math.random();
+					sphVerts[j+6]=1;	
 					}
 				else if(s==slices-1) {
-					sphVerts[j+4]=0.678-Math.random()/10;
-						sphVerts[j+5]=0.847-Math.random()/10;
-						sphVerts[j+6]=0.902;	
+					sphVerts[j+4]=Math.random();
+					sphVerts[j+5]=Math.random();
+					sphVerts[j+6]=1;		
 				}
 				else {
-						sphVerts[j+4]=0.678-Math.random()/10;
-						sphVerts[j+5]=0.847-Math.random()/10;
-						sphVerts[j+6]=0.902;				
+					sphVerts[j+4]=Math.random();
+					sphVerts[j+5]=Math.random();
+					sphVerts[j+6]=1;					
 				}
 			}
 		}
@@ -403,7 +439,7 @@ function makeSphere() {
 function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	modelMatrix.translate(20,2,10,0);
 	modelMatrix.scale(4,4,4);
-	modelMatrix.rotate(spinny*2, 0,1, 0.0);
+	modelMatrix.rotate(spinny*sp_0,ag_0,1-ag_0,0)
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
 	//modelMatrix.concat(quatMatrix);
 	
@@ -415,7 +451,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.9,0.9,0.9);
-	modelMatrix.rotate(spinny*3, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_1,ag_1,1-ag_1,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 	
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -425,7 +461,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_2,ag_2,1-ag_2,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -438,7 +474,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_3,ag_3,1-ag_3,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -451,7 +487,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_4, ag_4,1-ag_4,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -464,7 +500,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_5, ag_5,1-ag_5,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -477,7 +513,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_6,ag_6,1-ag_6,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -490,7 +526,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny*4, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_7, ag_7,1-ag_7,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -503,7 +539,7 @@ function drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 	pushMatrix(modelMatrix);
 	modelMatrix = popMatrix();
 	modelMatrix.scale(0.7,0.7,0.7);
-	modelMatrix.rotate(spinny*8, 1,1, 0.0);
+	modelMatrix.rotate(spinny*sp_8, ag_8,1-ag_8,0)
 	modelMatrix.translate(0.8,0.8,0.8,0);
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
@@ -518,7 +554,7 @@ function drawPropellor(gl,n,currentAngle, modelMatrix, u_ModelMatrix)
 	
 	modelMatrix.translate(10,30,10);
 	modelMatrix.scale(10,10,10);
-	modelMatrix.rotate(spinny*2, 0,1, 0.0);
+	modelMatrix.rotate(spinny*5, 0,1, 0.0);
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	gl.drawArrays(gl.TRIANGLES, (gndVerts.length + sphVerts.length)/floatsPerVertex, propVerts.length/floatsPerVertex);
 	modelMatrix.rotate(90, 0,1,0);
@@ -543,6 +579,20 @@ function drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
 	0/floatsPerVertex,	// start at this vertex number, and
 	sphVerts.length/floatsPerVertex);	// draw this many vertices.
+}
+function drawFatHelo(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+{
+	modelMatrix.rotate(-90,1,0,0);
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	drawPropellor(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+	modelMatrix.scale(0.7,0.7,0.7)
+	modelMatrix.rotate(spinny*5,0,-1,0)
+	modelMatrix.translate(0,1,0,0)
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+	0/floatsPerVertex,	// start at this vertex number, and
+	sphVerts.length/floatsPerVertex);	// draw this many vertices.
+
 }
 function drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
 {
@@ -573,24 +623,87 @@ function drawAxis(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
 		axis.length/floatsPerVertex);
 		
 }
-function drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
+function drawStair(gl, n, currentAngle, modelMatrix, u_ModelMatrix){
+	modelMatrix.translate(20,2,10,0);
+	modelMatrix.scale(4,4,4);
 	
-	modelMatrix.translate(-20,30,10,0)
-	modelMatrix.rotate(60,0,0,1)
-	modelMatrix.scale(5,10,10)
 	
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-		(sphVerts.length+gndVerts.length+propVerts)/floatsPerVertex,	// start at this vertex number, and
-		rectangle.length/floatsPerVertex);	// draw this many vertices.aaa
-		modelMatrix.scale(2,1,1)
-		modelMatrix.rotate(45,1,0,0)
-		modelMatrix.translate(0.3,0.7,0.8,0)
-		gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.9,0.9,0.9);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+	
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
-	0/floatsPerVertex,	// start at this vertex number, and
-	sphVerts.length/floatsPerVertex);	// draw this many vertices..
-		
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
+	pushMatrix(modelMatrix);
+	modelMatrix = popMatrix();
+	modelMatrix.scale(0.7,0.7,0.7);
+	modelMatrix.translate(0.8,0.8,0.8,0);
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
+		(sphVerts.length+gndVerts.length+propVerts.length)/floatsPerVertex,	// start at this vertex number, and
+		rectangle.length/floatsPerVertex);	// draw this aamany vertices.
 }
 function makeGroundGrid() {
 //==============================================================================
@@ -689,7 +802,12 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
-		drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+		modelMatrix.translate(0,0,60,0)
+		drawFatHelo(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		drawStair(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
 		modelMatrix.translate(1,-30,5,0)
@@ -707,7 +825,7 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		0, 0, 1);	// View UP vector.
 	modelMatrix.translate(40,30,-30,0)
 	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-	//DRAWING THE GRID
+
 	gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
 		gndStart/floatsPerVertex,	// start at this vertex number, and
 		gndVerts.length/floatsPerVertex);	// draw this many vertices.
@@ -715,10 +833,10 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		drawSwirly(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
-		drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		drawPropellor(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
-		drawPropellor(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		drawSphere(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
 		drawAxis(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
@@ -728,7 +846,12 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
 		drawSquare(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
-		drawIceCream(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+		modelMatrix.translate(0,0,60,0)
+		drawFatHelo(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+		modelMatrix = popMatrix();
+		pushMatrix(modelMatrix);
+		modelMatrix.translate(1,-30,5,0)
+		drawStair(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
 		modelMatrix = popMatrix();
 		pushMatrix(modelMatrix);
 		modelMatrix.translate(1,-30,5,0)
